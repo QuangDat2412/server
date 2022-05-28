@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const TypeCourseSchema = new mongoose.Schema(
     {
-        name: { type: String, default: '' },
+        name: { type: String, required: true },
         description: { type: String, default: '' },
         status: { type: Number, default: 1 },
     },

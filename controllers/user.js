@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const CryptoJS = require('crypto-js');
+const Common = require('../constants/common');
 
 const updateUser = async (req, res) => {
     if (req.body.password) {
@@ -42,12 +43,15 @@ const getUserById = async (req, res) => {
 const getAllUser = async (req, res) => {
     try {
         const users = await User.find();
-        // const users = await User.find({ $text: { $fullName: req.body.name } });
-        let _users = users.map((s) => {
+        let _users = users.filter((u) => {
+            const result = Common.Search(u.fullName, req.body.name);
+            return result;
+        });
+        _users = _users.map((s) => {
             const { password, ...other } = s._doc;
             return other;
         });
-        if (!(req.body.status === '')) {
+        if (!(req.body.status == 0)) {
             _users = _users.filter((user) => {
                 return user.status === parseInt(req.body.status);
             });
