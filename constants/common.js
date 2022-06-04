@@ -16,7 +16,16 @@ const Search = (a, b) => {
     const result = nonAccentVietnamese(a).includes(nonAccentVietnamese(b));
     return result;
 };
+const makeCode = (n) => {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    for (var i = 0; i < n; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+};
 module.exports = {
     nonAccentVietnamese,
     Search,
+    makeCode,
 };
