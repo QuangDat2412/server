@@ -1,5 +1,6 @@
 const Topic = require('../models/Topic');
 const Course = require('../models/Course');
+const Lesson = require('../models/Lesson');
 const Common = require('../constants/common');
 
 const add = async (req, res) => {
@@ -32,6 +33,11 @@ const getByModel = async (req, res) => {
             const result = Common.Search(u.name, req.body.name);
             return result;
         });
+        _topic = _topic.map((u) => {
+            const _u = u._doc;
+            return { ..._u, course: _u.courseId, courseId: _u.courseId._id };
+        });
+
         if (!(req.body.courseId == '0')) {
             _topic = _topic.filter((course) => {
                 return course.courseId._id == req.body.courseId;
@@ -42,10 +48,13 @@ const getByModel = async (req, res) => {
         res.status(500).json(err);
     }
 };
-const getByCode = async (req, res) => {
+
+const deleteTopic = async (req, res) => {
     try {
-        const course = await Course.find({ code: req.body.code }).populate('type', '_id name description ').exec();
-        res.status(200).json(course[0]);
+        await Lesson.deleteMany({ topicId: req.params.id }).exec();
+        const topic = await Topic.findByIdAndDelete(req.params.id);
+        await Course.findByIdAndUpdate(topic.courseId, { $pull: { listTopics: topic._id } });
+        res.status(200).json(true);
     } catch (err) {
         res.status(500).json(err);
     }
@@ -53,5 +62,5 @@ const getByCode = async (req, res) => {
 module.exports = {
     add,
     getByModel,
-    getByCode,
+    deleteTopic,
 };

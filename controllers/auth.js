@@ -8,7 +8,6 @@ const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client('475624587151-p1e4spm2s469j4s9g7dq3au2flar356k.apps.googleusercontent.com');
 
 const register = async (req, res) => {
-    // const isValid = speakeasy.totp.verify({ secret: req.body.email + process.env.PASS_SEC, token: req.body.otp, window: 19 });
     const newUser = new User({
         ...req.body,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SEC).toString(),

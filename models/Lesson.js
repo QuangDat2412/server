@@ -8,6 +8,7 @@ const LessonSchema = new mongoose.Schema(
         topicId: { type: mongoose.Schema.ObjectId, ref: 'Topic' },
         image: { type: String, default: '' },
         url: { type: String, default: '' },
+        time: { type: Number, default: 0 },
     },
     { timestamps: true }
 );

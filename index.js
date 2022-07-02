@@ -6,6 +6,7 @@ const cors = require('cors');
 const authRoute = require('./routes/auth');
 const userRoute = require('./routes/user');
 const courseRoute = require('./routes/course');
+const lcRoute = require('./routes/learningCourse');
 const optionRoute = require('./routes/option');
 const topicRoute = require('./routes/topic');
 const lessonRoute = require('./routes/lesson');
@@ -44,6 +45,7 @@ app.post('/api/upload/images', upload.single('file'), (req, res) => {
         console.error(error);
     }
 });
+app.use('/api/learningCourse', lcRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
 app.use('/api/courses', courseRoute);
