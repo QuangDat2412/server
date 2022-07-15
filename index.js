@@ -25,6 +25,7 @@ mongoose
     .catch((err) => console.log(err));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(cors());
+
 app.use(express.json());
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
