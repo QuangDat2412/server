@@ -1,8 +1,10 @@
 const express = require('express');
+const { exec } = require('child_process');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const fs = require('fs');
 const authRoute = require('./routes/auth');
 const userRoute = require('./routes/user');
 const courseRoute = require('./routes/course');
@@ -27,25 +29,53 @@ var corsOptions = {
     origin: '*',
 };
 
-app.use('/images', cors(corsOptions), express.static(path.join(__dirname, 'public/images')));
+app.use('/files', cors(corsOptions), express.static(path.join(__dirname, 'public/files')));
 app.use(cors());
 
 app.use(express.json());
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/images');
+        let type = file.mimetype.split('/')[0];
+        let _name = Common.makeCode(10);
+        req.body.name = _name;
+        let folder = 'public/files/' + type;
+        if (!fs.existsSync(folder)) {
+            fs.mkdirSync(folder);
+        }
+        if (type == 'video') {
+            folder = folder + '/' + _name;
+            if (!fs.existsSync(folder)) {
+                fs.mkdirSync(folder);
+            }
+        }
+        cb(null, folder);
     },
     filename: (req, file, cb) => {
-        let name = Common.makeCode(10) + '.' + file.originalname.split('.').reverse()[0];
+        let name = req.body.name + '.' + file.originalname.split('.').reverse()[0];
         req.body.name = name;
         cb(null, name);
     },
 });
 
 const upload = multer({ storage: storage });
-app.post('/api/upload/images', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('file'), (req, res) => {
     try {
-        return res.status(200).json('images/' + req.body.name[0]);
+        if (req.file) {
+            let type = req.file.mimetype.split('/')[0];
+            if (type == 'video') {
+                let newName = req.body.name.split('.')[0];
+                exec(
+                    `ffmpeg -i ${
+                        req.file.path
+                    } -hls_time 2 -hls_playlist_type vod -hls_flags independent_segments -hls_segment_type mpegts -hls_segment_filename ${
+                        req.file.destination + '/' + newName + '%03d.ts'
+                    }  ${req.file.destination + '/' + newName + '.m3u8'}`
+                );
+                return res.status(200).json('files/video' + newName + '/' + newName + '.m3u8');
+            } else {
+                return res.status(200).json('files/' + type + '/' + req.body.name);
+            }
+        }
     } catch (error) {
         console.error(error);
     }
