@@ -23,7 +23,11 @@ mongoose
     })
     .then(() => console.log('DB Connection Successful!'))
     .catch((err) => console.log(err));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+var corsOptions = {
+    origin: '*',
+};
+
+app.use('/images', cors(corsOptions), express.static(path.join(__dirname, 'public/images')));
 app.use(cors());
 
 app.use(express.json());
