@@ -71,7 +71,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
                         req.file.destination + '/' + newName + '%03d.ts'
                     }  ${req.file.destination + '/' + newName + '.m3u8'}`
                 );
-                return res.status(200).json('files/video' + newName + '/' + newName + '.m3u8');
+                return res.status(200).json('files/video/' + newName + '/' + newName + '.m3u8');
             } else {
                 return res.status(200).json('files/' + type + '/' + req.body.name);
             }
