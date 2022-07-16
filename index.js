@@ -29,7 +29,7 @@ var corsOptions = {
     origin: '*',
 };
 
-app.use('/files', cors(corsOptions), express.static(path.join(__dirname, 'public/files')));
+app.use('/files', cors(corsOptions), express.static(path.join(__dirname, 'wwwroot/files')));
 app.use(cors());
 
 app.use(express.json());
@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
         let type = file.mimetype.split('/')[0];
         let _name = Common.makeCode(10);
         req.body.name = _name;
-        let folder = 'public/files/' + type;
+        let folder = 'wwwroot/files/' + type;
         if (!fs.existsSync(folder)) {
             fs.mkdirSync(folder);
         }
