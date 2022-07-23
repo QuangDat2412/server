@@ -63,17 +63,20 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         if (req.file) {
             let type = req.file.mimetype.split('/')[0];
             if (type == 'video') {
-                let newName = req.body.name.split('.')[0];
+                let newName = req.body.name[0].split('.')[0];
                 exec(
                     `ffmpeg -i ${
                         req.file.path
                     } -hls_time 2 -hls_playlist_type vod -hls_flags independent_segments -hls_segment_type mpegts -hls_segment_filename ${
-                        req.file.destination + '/' + newName + '%03d.ts'
-                    }  ${req.file.destination + '/' + newName + '.m3u8'}`
+                        req.file.destination + '/' + newName + '%08d.ts'
+                    }  ${req.file.destination + '/' + newName + '.m3u8'}`,
+                    function (error, stdout, stderr) {
+                        fs.unlinkSync(req.file.path);
+                    }
                 );
                 return res.status(200).json('files/video/' + newName + '/' + newName + '.m3u8');
             } else {
-                return res.status(200).json('files/' + type + '/' + req.body.name);
+                return res.status(200).json('files/' + type + '/' + req.body.name[0]);
             }
         }
     } catch (error) {

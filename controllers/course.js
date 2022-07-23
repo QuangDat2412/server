@@ -52,7 +52,6 @@ const getByModel = async (req, res) => {
                         return await item;
                     })
                 );
-                console.log(a);
                 res.status(200).json(a);
             });
     } catch (err) {
