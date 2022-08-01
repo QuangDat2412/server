@@ -6,6 +6,6 @@ router.put('update/:id', verifyTokenAndAdmin, userCtrl.updateUser);
 router.delete('/:id', verifyTokenAndAdmin, userCtrl.deleteUser);
 router.get('/find/:id', verifyTokenAndAdmin, userCtrl.getUserById);
 router.post('/getAll', verifyTokenAndAdmin, userCtrl.getAllUser);
-router.post('/addUser', verifyTokenAndAdmin, userCtrl.newUser);
+router.post('/addUser', verifyTokenAndAuthorization, userCtrl.newUser);
 
 module.exports = router;

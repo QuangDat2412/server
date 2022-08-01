@@ -23,6 +23,7 @@
         "nodemailer": "^6.7.2",
         "nodemon": "^2.0.12",
         "path": "^0.12.7",
+        "socket.io": "^4.5.1",
         "speakeasy": "^2.0.0",
         "stripe": "^8.195.0"
     }

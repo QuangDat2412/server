@@ -13,24 +13,15 @@ const register = async (req, res) => {
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SEC).toString(),
     });
     try {
+        const isValid = speakeasy.totp.verify({ secret: req.body.email + process.env.PASS_SEC, token: req.body.otp, window: 19 });
+        if (!isValid) res.status(200).json(false);
         await newUser.save();
         res.status(200).json(true);
     } catch (err) {
         res.status(500).json(err);
     }
 };
-const checkOtp = async (req, res) => {
-    const isValid = speakeasy.totp.verify({ secret: req.body.email + process.env.PASS_SEC, token: req.body.otp, window: 19 });
-    try {
-        if (isValid) {
-            res.status(200).json(true);
-        } else {
-            res.status(400).json(false);
-        }
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
+
 const forgotPassword = async (req, res) => {
     const isValid = speakeasy.totp.verify({ secret: req.body.email + process.env.PASS_SEC, token: req.body.otp, window: 19 });
     if (req.body.password) {
@@ -48,7 +39,7 @@ const forgotPassword = async (req, res) => {
             );
             res.status(200).json(true);
         } else {
-            res.status(400).json(false);
+            res.status(200).json(false);
         }
     } catch (err) {
         res.status(500).json(err);
@@ -57,7 +48,8 @@ const forgotPassword = async (req, res) => {
 const se = async (email, subject, text) => {
     try {
         const transporter = nodemailer.createTransport({
-            service: 'hotmail',
+            host: 'smtp-mail.outlook.com',
+            port: 587,
             auth: {
                 user: 'dat.lq172465@sis.hust.edu.vn',
                 pass: 'Datumltk123',
@@ -75,6 +67,7 @@ const se = async (email, subject, text) => {
 };
 const sendMail = async (req, res) => {
     const otp = speakeasy.totp({ secret: req.body.email + process.env.PASS_SEC, window: 19 });
+    const user = await User.findOne({ email: req.body.email });
     const message = `Dear ${req.body.email},
     
     Bạn đang thực hiện xác nhận bảo mật tài khoản LMS APP, dưới đây là mã xác thực của bạn:
@@ -83,18 +76,16 @@ const sendMail = async (req, res) => {
                
     Nếu đây không phải là email của bạn, xin hãy bỏ qua email này, hãy đừng trả lời.`;
     try {
-        const user = await User.findOne({ email: req.body.email });
-
         if (req.params.slug === 'register') {
             if (user !== null) {
-                res.send(false);
+                res.status(201).json({ message: 'Email đã được sử dụng' });
             } else {
                 await se(req.body.email, 'Mã OTP:', message);
-                res.send(true);
+                res.status(200).send({ message: 'Gửi mã OTP thành công' });
             }
-        } else if (req.params.slug === 'forgotpassword') {
+        } else if (req.params.slug === 'forgot-password') {
             await se(req.body.email, 'Mã OTP:', message);
-            res.send(true);
+            res.status(200).send({ message: 'Gửi mã OTP thành công' });
         }
     } catch (error) {
         res.status(500).json(error);
@@ -189,7 +180,6 @@ const googleLogin = async (req, res) => {
 };
 module.exports = {
     register,
-    checkOtp,
     forgotPassword,
     sendMail,
     login,

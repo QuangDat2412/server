@@ -1,11 +1,14 @@
 const express = require('express');
 const { exec } = require('child_process');
-const app = express();
+const http = require('http');
+var app = express();
+const server = http.createServer(app);
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const fs = require('fs');
 const authRoute = require('./routes/auth');
+const commentRoute = require('./routes/comment');
 const userRoute = require('./routes/user');
 const courseRoute = require('./routes/course');
 const lcRoute = require('./routes/learningCourse');
@@ -33,6 +36,48 @@ app.use('/files', cors(corsOptions), express.static(path.join(__dirname, 'wwwroo
 app.use(cors());
 
 app.use(express.json());
+const socketIo = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+    },
+});
+let users = [];
+
+const addUser = (userId, courseId, socketId) => {
+    !users.some((user) => user.userId === userId && user.userId === courseId) && users.push({ userId, courseId, socketId });
+};
+
+const removeUser = (socketId) => {
+    users = users.filter((user) => user.socketId !== socketId);
+};
+
+const getUser = (userId) => {
+    return users.find((user) => user.userId === userId);
+};
+const getUsers = (courseId) => {
+    return users.filter((user) => user.courseId === courseId);
+};
+socketIo.on('connection', (socket) => {
+    console.log('New client connected' + socket.id);
+
+    socket.on('addUser', (model) => {
+        addUser(model.userId, model.courseId, socket.id);
+    });
+    socket.on('sendMessage', ({ courseId }) => {
+        const users = getUsers(courseId);
+
+        users.forEach((user) => {
+            socketIo.to(user.socketId).emit('getMessage', {
+                get: true,
+            });
+        });
+    });
+    socket.on('disconnect', () => {
+        console.log('a user disconnected!');
+        removeUser(socket.id);
+    });
+});
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let type = file.mimetype.split('/')[0];
@@ -90,7 +135,8 @@ app.use('/api/courses', courseRoute);
 app.use('/api/topics', topicRoute);
 app.use('/api/options', optionRoute);
 app.use('/api/lessons', lessonRoute);
+app.use('/api/comment', commentRoute);
 
-app.listen(process.env.PORT || 2412, () => {
+server.listen(process.env.PORT || 2412, () => {
     console.log('Backend server is running!');
 });
