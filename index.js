@@ -15,6 +15,7 @@ const lcRoute = require('./routes/learningCourse');
 const optionRoute = require('./routes/option');
 const topicRoute = require('./routes/topic');
 const lessonRoute = require('./routes/lesson');
+const typeCourseRoute = require('./routes/typeCourse');
 const multer = require('multer');
 const path = require('path');
 const Common = require('./constants/common');
@@ -136,6 +137,7 @@ app.use('/api/topics', topicRoute);
 app.use('/api/options', optionRoute);
 app.use('/api/lessons', lessonRoute);
 app.use('/api/comment', commentRoute);
+app.use('/api/typeCourses', typeCourseRoute);
 
 server.listen(process.env.PORT || 2412, () => {
     console.log('Backend server is running!');
